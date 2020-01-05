@@ -1,4 +1,9 @@
+import com.sun.corba.se.impl.orbutil.graph.Graph;
+
 import java.awt.image.AreaAveragingScaleFilter;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -221,7 +226,7 @@ public class Main {
                 trouve = true;
                 couleur++;
                 for (int s : v.conflit) {
-                    System.out.println(s);
+                    //System.out.println(s);
                     Sommet tempo = new Sommet(s);
                     if (C.contains(tempo)){
                         if (C.get(C.indexOf(new Sommet(s))).couleur == couleur){
@@ -280,7 +285,7 @@ public class Main {
             }
             int h = 10 + (int) (Math.random() * (50));
             tuples.add(new Tuple(sommets.get(i).id , h ,  conflit));
-            System.out.println("sommet :" + sommets.get(i).id + "   couleur :"+sommets.get(i).couleur+ "    size = "+h );
+            //System.out.println("sommet :" + sommets.get(i).id + "   couleur :"+sommets.get(i).couleur+ "    size = "+h );
 
         }
 
@@ -290,7 +295,46 @@ public class Main {
 
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
+
+        Scanner sc = new Scanner(new BufferedReader(new FileReader("DSJC250.5.txt")));
+
+        ArrayList<Sommet> g = new ArrayList<>();
+
+        while(sc.hasNextLine()) {
+                String[] line = sc.nextLine().trim().split(" ");
+
+            if (line[0].equals("p")){
+                //System.out.println("yes  "+Integer.parseInt(line[2]));
+                for (int i=1 ; i <= Integer.parseInt(line[2]) ; i++){
+                    g.add(new Sommet(i));
+                }
+                continue;
+            }
+
+            if (!line[0].equals("e"))
+                    continue;
+
+               if(line[0].equals("e")) {
+
+                   g.get(Integer.parseInt(line[1]) - 1).addConflict(g.get(Integer.parseInt(line[2]) - 1).id);
+                   g.get(Integer.parseInt(line[2]) - 1).addConflict(g.get(Integer.parseInt(line[1]) - 1).id);
+               }
+
+        }
+
+
+
+        for (int k = 0 ; k< g.size() ; k++){
+            int l = k+1;
+            System.out.print("le sommet " + l + " est en conflit avec  ");
+            for (int j=0 ; j< g.get(k).conflit.size() ; j++){
+                System.out.print(g.get(k).conflit.get(j)+"  ");
+
+            }
+            System.out.println();
+        }
+
         ArrayList<Integer> conflit = new ArrayList<>();
         conflit.add(2);
         Tuple obj1 = new Tuple(1, 2, conflit);
@@ -338,7 +382,7 @@ public class Main {
 
 
         //q6
-        System.out.println(DsaturWithBFDpacking(dsatur(graph) , 120));
+        System.out.println(DsaturWithBFDpacking(dsatur(g) , 150));
 
 
     }
