@@ -1,3 +1,4 @@
+import java.awt.image.AreaAveragingScaleFilter;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -237,6 +238,58 @@ public class Main {
         return C;
     }
 
+
+
+
+    public static ArrayList<Boite>  DsaturWithFFDpacking(ArrayList<Sommet> sommets, int size_boite){
+        ArrayList<Tuple> tuples = new ArrayList<>();
+
+        for (int i= 0 ; i<sommets.size() ; i++){
+            ArrayList<Integer> conflit = new ArrayList<>();
+            for (int j= 0 ; j< sommets.size() ; j++){
+                if (i == j)
+                    continue;
+                if (sommets.get(i).couleur != sommets.get(j).couleur){
+                    conflit.add(sommets.get(j).id);
+                }
+            }
+            int h = 10 + (int) (Math.random() * (50));
+            tuples.add(new Tuple(sommets.get(i).id , h ,  conflit));
+            System.out.println("sommet :" + sommets.get(i).id + "   couleur :"+sommets.get(i).couleur+ "    size = "+h );
+
+        }
+
+        Collections.sort(tuples);
+        return fitDecreasingPacking(tuples, size_boite);
+
+    }
+
+
+
+    public static ArrayList<Boite>  DsaturWithBFDpacking(ArrayList<Sommet> sommets, int size_boite){
+        ArrayList<Tuple> tuples = new ArrayList<>();
+
+        for (int i= 0 ; i<sommets.size() ; i++){
+            ArrayList<Integer> conflit = new ArrayList<>();
+            for (int j= 0 ; j< sommets.size() ; j++){
+                if (i == j)
+                    continue;
+                if (sommets.get(i).couleur != sommets.get(j).couleur){
+                    conflit.add(sommets.get(j).id);
+                }
+            }
+            int h = 10 + (int) (Math.random() * (50));
+            tuples.add(new Tuple(sommets.get(i).id , h ,  conflit));
+            System.out.println("sommet :" + sommets.get(i).id + "   couleur :"+sommets.get(i).couleur+ "    size = "+h );
+
+        }
+
+        Collections.sort(tuples);
+        return bestFitDecreasingPacking(tuples, size_boite);
+    }
+
+
+
     public static void main(String[] args) {
         ArrayList<Integer> conflit = new ArrayList<>();
         conflit.add(2);
@@ -283,7 +336,10 @@ public class Main {
         graph.add(sommet4);
         graph.add(sommet5);
 
-        System.out.println(dsatur(graph));
+
+        //q6
+        System.out.println(DsaturWithBFDpacking(dsatur(graph) , 120));
+
 
     }
 }
