@@ -76,15 +76,21 @@ public class Main {
     public static class Sommet implements Comparable<Sommet>{
         public int id;
         public int couleur;
+        public int size;
         public ArrayList<Integer> conflit;
-        public Sommet(int id, int couleur, ArrayList<Integer> conflit) {
+        public Sommet(int id, int couleur, ArrayList<Integer> conflit, int size) {
             this.id = id;
             this.couleur = couleur;
             this.conflit = conflit;
+            this.size = size;
+        }
+
+        public Sommet(int id, int size){
+            this(id, -1, new ArrayList<>(), size);
         }
 
         public Sommet(int id){
-            this(id, -1, new ArrayList<>());
+            this(id, 0);
         }
 
         public void addConflict(int id){
@@ -149,6 +155,7 @@ public class Main {
                 rengement.add(boite);
             }
         }
+//        System.out.println("nombre de boite : "+ rengement.size());
         return rengement;
     }
 
@@ -258,14 +265,16 @@ public class Main {
                     conflit.add(sommets.get(j).id);
                 }
             }
-            int h = 10 + (int) (Math.random() * (50));
-            tuples.add(new Tuple(sommets.get(i).id , h ,  conflit));
-            System.out.println("sommet :" + sommets.get(i).id + "   couleur :"+sommets.get(i).couleur+ "    size = "+h );
+            tuples.add(new Tuple(sommets.get(i).id , sommets.get(i).size ,  conflit));
+            //System.out.println("sommet :" + sommets.get(i).id + "   couleur :"+sommets.get(i).couleur+ "    size = "+h );
 
         }
 
         Collections.sort(tuples);
-        return fitDecreasingPacking(tuples, size_boite);
+
+        ArrayList<Boite> rangement = fitDecreasingPacking(tuples, size_boite);
+        return rangement;
+
 
     }
 
@@ -283,14 +292,15 @@ public class Main {
                     conflit.add(sommets.get(j).id);
                 }
             }
-            int h = 10 + (int) (Math.random() * (50));
-            tuples.add(new Tuple(sommets.get(i).id , h ,  conflit));
+            tuples.add(new Tuple(sommets.get(i).id , sommets.get(i).size ,  conflit));
             //System.out.println("sommet :" + sommets.get(i).id + "   couleur :"+sommets.get(i).couleur+ "    size = "+h );
 
         }
 
         Collections.sort(tuples);
-        return bestFitDecreasingPacking(tuples, size_boite);
+
+        ArrayList<Boite> rangement = bestFitDecreasingPacking(tuples, size_boite);
+        return rangement;
     }
 
 
@@ -300,6 +310,7 @@ public class Main {
         Scanner sc = new Scanner(new BufferedReader(new FileReader("DSJC250.5.txt")));
 
         ArrayList<Sommet> g = new ArrayList<>();
+        ArrayList<Tuple> o = new ArrayList<>();
 
         while(sc.hasNextLine()) {
                 String[] line = sc.nextLine().trim().split(" ");
@@ -307,7 +318,10 @@ public class Main {
             if (line[0].equals("p")){
                 //System.out.println("yes  "+Integer.parseInt(line[2]));
                 for (int i=1 ; i <= Integer.parseInt(line[2]) ; i++){
-                    g.add(new Sommet(i));
+                    int h = 10 + (int) (Math.random() * (50));
+                    g.add(new Sommet(i, h));
+
+                    o.add(new Tuple(i , h));
                 }
                 continue;
             }
@@ -319,13 +333,15 @@ public class Main {
 
                    g.get(Integer.parseInt(line[1]) - 1).addConflict(g.get(Integer.parseInt(line[2]) - 1).id);
                    g.get(Integer.parseInt(line[2]) - 1).addConflict(g.get(Integer.parseInt(line[1]) - 1).id);
+                   o.get(Integer.parseInt(line[2]) - 1).conflit.add(g.get(Integer.parseInt(line[1]) - 1).id);
+                   o.get(Integer.parseInt(line[2]) - 1).conflit.add(g.get(Integer.parseInt(line[1]) - 1).id);
                }
 
         }
 
 
 
-        for (int k = 0 ; k< g.size() ; k++){
+        /*for (int k = 0 ; k< g.size() ; k++){
             int l = k+1;
             System.out.print("le sommet " + l + " est en conflit avec  ");
             for (int j=0 ; j< g.get(k).conflit.size() ; j++){
@@ -333,56 +349,146 @@ public class Main {
 
             }
             System.out.println();
-        }
+        }*/
 
-        ArrayList<Integer> conflit = new ArrayList<>();
-        conflit.add(2);
-        Tuple obj1 = new Tuple(1, 2, conflit);
-        Tuple obj2 = new Tuple(2, 4);
-        Tuple obj3 = new Tuple(3, 3);
-        Tuple obj4 = new Tuple(4, 1);
-        ArrayList<Tuple> objets = new ArrayList<>();
-        objets.add(obj1);
-        objets.add(obj2);
-        objets.add(obj3);
-        objets.add(obj4);
+//        ArrayList<Integer> conflit = new ArrayList<>();
+//        conflit.add(2);
+//        Tuple obj1 = new Tuple(1, 2, conflit);
+//        Tuple obj2 = new Tuple(2, 4);
+//        Tuple obj3 = new Tuple(3, 3);
+//        Tuple obj4 = new Tuple(4, 1);
+//        ArrayList<Tuple> objets = new ArrayList<>();
+//        objets.add(obj1);
+//        objets.add(obj2);
+//        objets.add(obj3);
+//        objets.add(obj4);
+
+        int min = Integer.MAX_VALUE;
+        int max = 0;
+        int somme = 0;
+
+
 
         ///test 1 (q1)
-        System.out.println(fractionalPackaging(objets, 10));
+        System.out.println("FractionalPacking :\n");
+        System.out.println(fractionalPackaging(o, 150));
+        System.out.println("\n*********************************************\n");
 
         ///test 2 (q2)
-        Collections.sort(objets);
-        System.out.println(fitDecreasingPacking(objets, 10));
+        System.out.println("FirstFitDecreasingPacking :\n");
+        Collections.sort(o);
+
+        min = Integer.MAX_VALUE;
+        max = 0;
+        somme = 0;
+        for (int i = 0; i < 1000; i++) {
+            int value = fitDecreasingPacking(o , 150).size();
+            if (value < min){
+                min = value;
+            }
+            if (value > max) {
+                max = value;
+            }
+            somme = somme + value;
+        }
+        System.out.println("["+ min + "|" + max + "|" + ((float)somme/1000.0) +"]");
+
+
+        //System.out.println(fitDecreasingPacking(o, 150).size());
+        System.out.println("\n*********************************************\n");
+
 
         ///q3
-        Collections.sort(objets);
-        System.out.println(bestFitDecreasingPacking(objets, 10));
+        System.out.println("BestFitDecreasingPacking :\n");
+        Collections.sort(o);
+        min = Integer.MAX_VALUE;
+        max = 0;
+        somme = 0;
+        for (int i = 0; i < 1000; i++) {
+            int value = bestFitDecreasingPacking(o , 150).size();
+            if (value < min){
+                min = value;
+            }
+            if (value > max) {
+                max = value;
+            }
+            somme = somme + value;
+        }
+        System.out.println("["+ min + "|" + max + "|" + ((float)somme/1000.0) +"]");
+
+        System.out.println("\n*********************************************\n");
+
 
         ///q4
-        Sommet sommet1 = new Sommet(1);
-        sommet1.addConflict(2);
-        sommet1.addConflict(3);
-        sommet1.addConflict(4);
-        sommet1.addConflict(5);
-        Sommet sommet2 = new Sommet(2);
-        sommet2.addConflict(1);
-        sommet2.addConflict(3);
-        sommet2.addConflict(4);
-        sommet2.addConflict(5);
-        Sommet sommet3 = new Sommet(3);
-        Sommet sommet4 = new Sommet(4);
-        Sommet sommet5 = new Sommet(5);
+//        Sommet sommet1 = new Sommet(1);
+//        sommet1.addConflict(2);
+//        sommet1.addConflict(3);
+//        sommet1.addConflict(4);
+//        sommet1.addConflict(5);
+//        Sommet sommet2 = new Sommet(2);
+//        sommet2.addConflict(1);
+//        sommet2.addConflict(3);
+//        sommet2.addConflict(4);
+//        sommet2.addConflict(5);
+//        Sommet sommet3 = new Sommet(3);
+//        Sommet sommet4 = new Sommet(4);
+//        Sommet sommet5 = new Sommet(5);
+//
+//        ArrayList<Sommet> graph = new ArrayList<>();
+//        graph.add(sommet1);
+//        graph.add(sommet2);
+//        graph.add(sommet3);
+//        graph.add(sommet4);
+//        graph.add(sommet5);
 
-        ArrayList<Sommet> graph = new ArrayList<>();
-        graph.add(sommet1);
-        graph.add(sommet2);
-        graph.add(sommet3);
-        graph.add(sommet4);
-        graph.add(sommet5);
+
+        //q4
+        ArrayList<Sommet> sommets = dsatur(g);
+
+
+        //q5
+        System.out.println("DsaturWithFFDpacking :\n");
+         min = Integer.MAX_VALUE;
+         max = 0;
+         somme = 0;
+        for (int i = 0; i < 1000; i++) {
+            int value = DsaturWithFFDpacking(sommets , 150).size();
+            if (value < min){
+                min = value;
+            }
+            if (value > max) {
+                max = value;
+            }
+            somme = somme + value;
+        }
+        System.out.println("["+ min + "|" + max + "|" + ((float)somme/1000.0) +"]");
+//        System.out.println(DsaturWithFFDpacking(sommets , 150).size());
+        System.out.println("\n*********************************************\n");
 
 
         //q6
-        System.out.println(DsaturWithBFDpacking(dsatur(g) , 150));
+        System.out.println("DsaturWithBFDpacking :\n");
+
+
+        min = Integer.MAX_VALUE;
+        max = 0;
+        somme = 0;
+        for (int i = 0; i < 1000; i++) {
+            int value = DsaturWithBFDpacking(sommets , 150).size();
+            if (value < min){
+                min = value;
+            }
+            if (value > max) {
+                max = value;
+            }
+            somme = somme + value;
+        }
+        System.out.println("["+ min + "|" + max + "|" + ((float)somme/1000.0) +"]");
+
+
+
+        //System.out.println(DsaturWithBFDpacking(sommets , 150).size());
+        System.out.println("\n*********************************************\n");
 
 
     }
